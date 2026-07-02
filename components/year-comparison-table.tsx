@@ -48,12 +48,14 @@ export function YearComparisonTable({ data }: YearComparisonTableProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Año</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas 93</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas 95</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas 97</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Diesel</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">GLP</th>
+                <th className="px-3 py-3 text-left font-semibold text-foreground">Año</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Gas 93</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Gas 95</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Gas 97</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Parafina</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Eólica</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Solar</th>
+                <th className="px-3 py-3 text-right font-semibold text-foreground">Marítima</th>
               </tr>
             </thead>
             <tbody>
@@ -61,21 +63,27 @@ export function YearComparisonTable({ data }: YearComparisonTableProps) {
                 const prevRow = tableData[index + 1]
                 return (
                   <tr key={row.year} className="border-b border-border/30 transition-colors hover:bg-secondary/30">
-                    <td className="px-4 py-3 font-medium text-foreground">{row.year}</td>
-                    <td className={`px-4 py-3 text-right ${getChangeClass(row.gasolina93, prevRow?.gasolina93)}`}>
+                    <td className="px-3 py-3 font-bold text-foreground">{row.year}</td>
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.gasolina93, prevRow?.gasolina93)}`}>
                       {formatPrice(row.gasolina93)}
                     </td>
-                    <td className={`px-4 py-3 text-right ${getChangeClass(row.gasolina95, prevRow?.gasolina95)}`}>
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.gasolina95, prevRow?.gasolina95)}`}>
                       {formatPrice(row.gasolina95)}
                     </td>
-                    <td className={`px-4 py-3 text-right ${getChangeClass(row.gasolina97, prevRow?.gasolina97)}`}>
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.gasolina97, prevRow?.gasolina97)}`}>
                       {formatPrice(row.gasolina97)}
                     </td>
-                    <td className={`px-4 py-3 text-right ${getChangeClass(row.diesel, prevRow?.diesel)}`}>
-                      {formatPrice(row.diesel)}
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.kerosene, prevRow?.kerosene)}`}>
+                      {formatPrice(row.kerosene ?? null)}
                     </td>
-                    <td className={`px-4 py-3 text-right ${getChangeClass(row.glp, prevRow?.glp)}`}>
-                      {formatPrice(row.glp)}
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.eolica ?? null, prevRow?.eolica ?? null)}`}>
+                      {formatPrice(row.eolica ?? null)}
+                    </td>
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.solar ?? null, prevRow?.solar ?? null)}`}>
+                      {formatPrice(row.solar ?? null)}
+                    </td>
+                    <td className={`px-3 py-3 text-right font-medium ${getChangeClass(row.maritima ?? null, prevRow?.maritima ?? null)}`}>
+                      {formatPrice(row.maritima ?? null)}
                     </td>
                   </tr>
                 )

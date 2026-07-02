@@ -148,18 +148,20 @@ export function EnterpriseCalculator({ currentPrices }: EnterpriseCalculatorProp
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} horizontal={true} vertical={false} />
               <XAxis 
                 type="number"
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-                tickLine={false}
+                stroke="#ffffff"
+                tick={{ fill: "#ffffff", fontSize: 12, fontWeight: 600 }}
+                tickLine={{ stroke: "#ffffff" }}
+                axisLine={{ stroke: "rgba(255, 255, 255, 0.4)" }}
                 tickFormatter={(value) => value >= 1000000 ? `$${(value / 1000000).toFixed(1)}M` : `$${value.toLocaleString()}`}
               />
               <YAxis 
                 type="category"
                 dataKey="fuel"
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-                tickLine={false}
-                width={120}
+                stroke="#ffffff"
+                tick={{ fill: "#ffffff", fontSize: 12, fontWeight: 600 }}
+                tickLine={{ stroke: "#ffffff" }}
+                axisLine={{ stroke: "rgba(255, 255, 255, 0.4)" }}
+                width={125}
               />
               <Tooltip 
                 contentStyle={{ 

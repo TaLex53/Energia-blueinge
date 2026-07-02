@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { useFuelData } from "@/hooks/use-fuel-data"
 import { Header } from "@/components/header"
+import { Sidebar } from "@/components/sidebar"
 import { StatsCard } from "@/components/stats-card"
 import { EnergyCalculator } from "@/components/energy-calculator"
 import { PriceChart } from "@/components/price-chart"
@@ -11,18 +13,20 @@ import { EnterpriseCalculator } from "@/components/enterprise-calculator"
 import { YearComparisonTable } from "@/components/year-comparison-table"
 import { RegionMap } from "@/components/region-map"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2 } from "lucide-react"
+import { Loader2, Calculator } from "lucide-react"
 import { FUEL_ENERGY } from "@/lib/types"
 
 export function Dashboard() {
   const { stations, yearlyAverages, currentPrices, isLoading, error } = useFuelData()
+  const [activeModule, setActiveModule] = useState<"dashboard" | "calculadora">("dashboard")
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Cargando datos de combustibles...</p>
+          <p className="text-muted-foreground">Cargando datos de CalEnergy IA...</p>
         </div>
       </div>
     )
@@ -69,83 +73,113 @@ export function Dashboard() {
     : 0
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto space-y-6 px-4 py-8">
-        {/* Stats Overview */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Estaciones Analizadas"
-            value={stations.length.toLocaleString("es-CL")}
-            subtitle="En todo Chile"
-            icon="fuel"
-          />
-          <StatsCard
-            title="Precio Prom. Gasolina 93"
-            value={avgGas93 > 0 ? `$${Math.round(avgGas93).toLocaleString("es-CL")}` : "-"}
-            trend={yoyChange > 0 ? "up" : yoyChange < 0 ? "down" : "neutral"}
-            trendValue={`${yoyChange > 0 ? "+" : ""}${yoyChange.toFixed(1)}% vs año anterior`}
-            icon="dollar"
-          />
-          <StatsCard
-            title="Precio Prom. Diesel"
-            value={avgDiesel > 0 ? `$${Math.round(avgDiesel).toLocaleString("es-CL")}` : "-"}
-            subtitle="Por litro"
-            icon="dollar"
-          />
-          <StatsCard
-            title="Mejor Eficiencia"
-            value={bestEfficiency ? `$${Math.round(bestEfficiency.costPerKwh)}/kWh` : "-"}
-            subtitle={bestEfficiency ? bestEfficiency.fuel.toUpperCase() : ""}
-            icon="zap"
-          />
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Top sticky header spanning full width with toggle button & brand on left */}
+      <Header
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+        isCollapsed={isCollapsed}
+      />
+
+      <div className="flex flex-1 min-h-0">
+        {/* Left Sidebar directly beneath top header */}
+        <Sidebar
+          activeModule={activeModule}
+          setActiveModule={setActiveModule}
+          isCollapsed={isCollapsed}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex flex-1 flex-col min-w-0 overflow-y-auto">
+          <main className="flex-1 container mx-auto space-y-6 px-4 py-8">
+            {activeModule === "dashboard" ? (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                {/* Stats Overview */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <StatsCard
+                    title="Puntos de Suministro Industrial"
+                    value={stations.length.toLocaleString("es-CL")}
+                    subtitle="Monitoreo en Red Nacional"
+                    icon="fuel"
+                  />
+                  <StatsCard
+                    title="Costo Base Combustión (Gas 93)"
+                    value={avgGas93 > 0 ? `$${Math.round(avgGas93).toLocaleString("es-CL")}` : "-"}
+                    trend={yoyChange > 0 ? "up" : yoyChange < 0 ? "down" : "neutral"}
+                    trendValue={`${yoyChange > 0 ? "+" : ""}${yoyChange.toFixed(1)}% vs año anterior`}
+                    icon="dollar"
+                  />
+                  <StatsCard
+                    title="Costo Térmico Diesel / Calderas"
+                    value={avgDiesel > 0 ? `$${Math.round(avgDiesel).toLocaleString("es-CL")}` : "-"}
+                    subtitle="Promedio por litro industrial"
+                    icon="dollar"
+                  />
+                  <StatsCard
+                    title="Mejor Eficiencia en Procesos"
+                    value={bestEfficiency ? `$${Math.round(bestEfficiency.costPerKwh)}/kWh` : "-"}
+                    subtitle={bestEfficiency ? `Óptimo térmico: ${bestEfficiency.fuel.toUpperCase()}` : ""}
+                    icon="zap"
+                  />
+                </div>
+
+                {/* Tabs for different views */}
+                <Tabs defaultValue="trends" className="space-y-4">
+                  <TabsList className="bg-secondary/50 flex flex-wrap h-auto gap-1 p-1">
+                    <TabsTrigger value="trends">Evolución Térmica</TabsTrigger>
+                    <TabsTrigger value="efficiency">Rendimiento ($/kWh)</TabsTrigger>
+                    <TabsTrigger value="budget">Costos Operacionales</TabsTrigger>
+                    <TabsTrigger value="comparison">Matriz Anual</TabsTrigger>
+                    <TabsTrigger value="regions">Suministro Regional</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="trends" className="space-y-4">
+                    <PriceChart data={yearlyAverages} selectedFuels={["gasolina93", "gasolina95", "gasolina97", "kerosene", "eolica", "solar", "maritima"]} />
+                  </TabsContent>
+
+                  <TabsContent value="efficiency" className="space-y-4">
+                    <EfficiencyChart currentPrices={currentPrices} />
+                  </TabsContent>
+
+                  <TabsContent value="budget" className="space-y-4">
+                    <BudgetComparisonChart currentPrices={currentPrices} />
+                  </TabsContent>
+
+                  <TabsContent value="comparison" className="space-y-4">
+                    <YearComparisonTable data={yearlyAverages} />
+                  </TabsContent>
+
+                  <TabsContent value="regions" className="space-y-4">
+                    <RegionMap stations={stations} />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : (
+              <div className="space-y-8 animate-in fade-in-50 duration-300">
+                <div className="flex items-center gap-3 border-b border-border/50 pb-4">
+                  <div className="rounded-xl bg-gradient-to-tr from-teal-500 to-blue-600 p-2 text-white">
+                    <Calculator className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">Simulaciones Térmicas y Optimización de Plantas de Proceso</h2>
+                    <p className="text-sm text-muted-foreground">Analiza costos por energía real útil (kWh térmico) y calcula ahorros en calderas, hornos y líneas de producción</p>
+                  </div>
+                </div>
+
+                {/* Energy Calculator */}
+                <EnergyCalculator yearlyAverages={yearlyAverages} currentPrices={currentPrices} />
+
+                {/* Enterprise Calculator */}
+                <EnterpriseCalculator currentPrices={currentPrices} />
+              </div>
+            )}
+          </main>
+
+          <footer className="border-t border-border/50 py-6 text-center text-xs text-muted-foreground">
+            <p>CalEnergy IA - Plataforma de Optimización y Eficiencia Energética para Plantas de Proceso</p>
+            <p className="mt-1">© {new Date().getFullYear()} Todos los derechos reservados.</p>
+          </footer>
         </div>
-
-        {/* Energy Calculator */}
-        <EnergyCalculator yearlyAverages={yearlyAverages} currentPrices={currentPrices} />
-
-        {/* Tabs for different views */}
-        <Tabs defaultValue="trends" className="space-y-4">
-          <TabsList className="bg-secondary/50">
-            <TabsTrigger value="trends">Tendencias</TabsTrigger>
-            <TabsTrigger value="efficiency">Eficiencia</TabsTrigger>
-            <TabsTrigger value="budget">Presupuesto</TabsTrigger>
-            <TabsTrigger value="enterprise">Empresas (Demanda)</TabsTrigger>
-            <TabsTrigger value="comparison">Comparativa</TabsTrigger>
-            <TabsTrigger value="regions">Por Región</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="trends" className="space-y-4">
-            <PriceChart data={yearlyAverages} selectedFuels={["gasolina93", "gasolina95", "diesel"]} />
-          </TabsContent>
-
-          <TabsContent value="efficiency" className="space-y-4">
-            <EfficiencyChart currentPrices={currentPrices} />
-          </TabsContent>
-
-          <TabsContent value="budget" className="space-y-4">
-            <BudgetComparisonChart currentPrices={currentPrices} />
-          </TabsContent>
-
-          <TabsContent value="enterprise" className="space-y-4">
-            <EnterpriseCalculator currentPrices={currentPrices} />
-          </TabsContent>
-
-          <TabsContent value="comparison" className="space-y-4">
-            <YearComparisonTable data={yearlyAverages} />
-          </TabsContent>
-
-          <TabsContent value="regions" className="space-y-4">
-            <RegionMap stations={stations} />
-          </TabsContent>
-        </Tabs>
-      </main>
-
-      <footer className="border-t border-border/50 py-6 text-center text-xs text-muted-foreground">
-        <p>Datos de combustibles Chile - Análisis de costos y eficiencia energética</p>
-        <p className="mt-1">Fuentes: Servicentros y precios históricos GLP</p>
-      </footer>
+      </div>
     </div>
   )
 }

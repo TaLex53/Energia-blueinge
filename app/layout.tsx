@@ -14,25 +14,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Análisis de Combustibles Chile',
-  description: 'Dashboard de análisis de costos y eficiencia energética de combustibles en Chile',
+  title: 'CalEnergy IA',
+  description: 'Plataforma Inteligente de Eficiencia y Costos de Combustible en Chile',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/iconbluein.png',
+    apple: '/iconbluein.png',
   },
 }
 

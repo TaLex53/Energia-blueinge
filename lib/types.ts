@@ -118,4 +118,7 @@ export interface YearlyAverage {
   glp: number | null;
   gnc: number | null;
   kerosene: number | null;
+  solar?: number | null;
+  eolica?: number | null;
+  maritima?: number | null;
 }
